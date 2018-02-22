@@ -1,10 +1,9 @@
 package nyoj.d001.t461.zxy;
 
+//AC
+
 import java.util.Scanner;
 
-/**
- * Created by zhang on 2018-02-08.
- */
 public class Main {
 
     public static void main(String[] args) {

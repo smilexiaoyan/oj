@@ -1,4 +1,6 @@
-package nyoj.d002.t8;
+package nyoj.d002.t8.zxy;
+
+//AC
 
 import java.util.Arrays;
 import java.util.Scanner;
