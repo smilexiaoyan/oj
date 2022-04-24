@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Solution {
+
     private final List<List<String>> result = new ArrayList<>();
 
     public List<List<String>> solveNQueens(int n) {
@@ -17,16 +18,13 @@ public class Solution {
 
     public void p(int[] map, int n) {
         if (n == map.length - 1) {
-            for (int a = 0; a < map.length; a++) {
-                int b = map[a];
-                for (int x = a + 1; x < map.length; x++) {
-                    int y = map[x];
-                    if (!isCorrect(a, b, x, y)) {
-                        return;
-                    }
-                }
+            if (isCorrect(map, map.length)) {
+                append(map);
             }
-            append(map);
+            return;
+        }
+        // 剪枝
+        if (!isCorrect(map, n)) {
             return;
         }
         for (int i = n; i < map.length; i++) {
@@ -42,7 +40,20 @@ public class Solution {
         a[j] = temp;
     }
 
-    public boolean isCorrect(int a, int b, int x, int y) {
+    public boolean isCorrect(int[] map, int n) {
+        for (int a = 0; a < n; a++) {
+            int b = map[a];
+            for (int x = a + 1; x < n; x++) {
+                int y = map[x];
+                if (!isContact(a, b, x, y)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean isContact(int a, int b, int x, int y) {
         if (x == a || y == b) {
             return false;
         }
