@@ -54,10 +54,7 @@ public class Solution {
     }
 
     public boolean isContact(int a, int b, int x, int y) {
-        if (x == a || y == b) {
-            return false;
-        }
-        int d = Math.abs(y - b);
+        int d = y - b;
         return x != a + d && x != a - d;
     }
 
