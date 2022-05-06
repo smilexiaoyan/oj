@@ -1,4 +1,4 @@
-package techfin.d002.t51;
+package leetcode.d002.t51;
 
 import java.util.ArrayList;
 import java.util.List;

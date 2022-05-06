@@ -1,4 +1,4 @@
-package techfin.d001.t479;
+package leetcode.d001.t479;
 
 public class Solution {
 
