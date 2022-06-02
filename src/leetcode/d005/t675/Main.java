@@ -62,11 +62,11 @@ public class Main {
 //                new int[]{0, 0, 4},
 //                new int[]{7, 6, 5}
 //        };
-                r = new int[][]{
-                new int[]{1, 2, 3},
-                new int[]{0, 0, 0},
-                new int[]{7, 6, 5}
-        };
+//                r = new int[][]{
+//                new int[]{1, 2, 3},
+//                new int[]{0, 0, 0},
+//                new int[]{7, 6, 5}
+//        };
         final List<List<Integer>> arr = new ArrayList<>();
         for (int[] rr : r) {
             final ArrayList<Integer> arr_ = new ArrayList<>();
