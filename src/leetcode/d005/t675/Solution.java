@@ -42,6 +42,8 @@ class Solution {
 
     final HashMap<Pos, Pos> p2p = new HashMap<>();
 
+    Set<Pos> visited = new HashSet<>();
+
     int sum = 0;
 
     public int cutOffTree(List<List<Integer>> forest) {
@@ -60,7 +62,7 @@ class Solution {
 
         final List<Pos> c = map.keySet().stream().sorted().map(map::get).collect(Collectors.toList());
         final Iterator<Pos> iterator = c.iterator();
-        Pos prev = new Pos(0, 0);
+        Pos prev = iterator.next();
 
         while (iterator.hasNext()) {
             Pos p = iterator.next();
@@ -73,8 +75,12 @@ class Solution {
             Arrays.fill(asl0[i], -1);
         }
         f(forest, asl0, 0, 0, 0);
-
-        add(asl0, Pos.pos0);
+        final Pos pos = c.get(0);
+        sum += asl0[pos.x][pos.y];
+        visited.add(Pos.pos0);
+        if (!add(asl0, Pos.pos0)) {
+            return -1;
+        }
         f2(asl0, asl0, Pos.pos0, new Pos(0, 1));
         f2(asl0, asl0, Pos.pos0, new Pos(1, 0));
         return sum;
@@ -88,7 +94,6 @@ class Solution {
                 sum = -1;
                 return false;
             }
-            System.out.println(src + " -> " + dst + " "+ asl[dst.x][dst.y]);
             sum += asl[dst.x][dst.y];
             return !p2p.isEmpty();
         }
@@ -96,10 +101,13 @@ class Solution {
     }
 
     void f2(int[][] asl0, int[][] prev, Pos src, Pos dst) {
-        if (p2p.isEmpty()) {
+        if (outOfBound(asl0, dst.x, dst.y)) {
             return;
         }
-        if (outOfBound(asl0, dst.x, dst.y)) {
+        if (visited.contains(dst)) {
+            return;
+        }
+        if (p2p.isEmpty()) {
             return;
         }
         if (asl0[dst.x][dst.y] <= asl0[src.x][src.y]) {
@@ -111,7 +119,7 @@ class Solution {
         }
         f3(prev, asl, dst.x, dst.y, prev[src.x][src.y], -1);
         f3(prev, asl, src.x, src.y, -1, 1);
-
+        visited.add(dst);
         if (!add(asl, dst)) {
             return;
         }
@@ -133,10 +141,10 @@ class Solution {
             return;
         }
         asl[x][y] = prev[x][y] + dist;
-        f3(prev, asl, x - 1, y, asl[x][y], dist);
-        f3(prev, asl, x + 1, y, asl[x][y], dist);
-        f3(prev, asl, x, y - 1, asl[x][y], dist);
-        f3(prev, asl, x, y + 1, asl[x][y], dist);
+        f3(prev, asl, x - 1, y, prev[x][y], dist);
+        f3(prev, asl, x + 1, y, prev[x][y], dist);
+        f3(prev, asl, x, y - 1, prev[x][y], dist);
+        f3(prev, asl, x, y + 1, prev[x][y], dist);
     }
 
     void f(List<List<Integer>> forest, int[][] asl, int x, int y, int value) {
