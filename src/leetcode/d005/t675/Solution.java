@@ -75,6 +75,7 @@ class Solution {
             Arrays.fill(asl0[i], -1);
         }
         f(forest, asl0, 0, 0, 0);
+//        Utils.print_natural(asl0);
         final Pos pos = c.get(0);
         sum += asl0[pos.x][pos.y];
         visited.add(Pos.pos0);
@@ -119,6 +120,7 @@ class Solution {
         }
         f3(prev, asl, dst.x, dst.y, prev[src.x][src.y], -1);
         f3(prev, asl, src.x, src.y, -1, 1);
+//        Utils.print_natural(asl);
         visited.add(dst);
         if (!add(asl, dst)) {
             return;

@@ -39,7 +39,6 @@ class Solution_4 {
     Map<Pos, int[][]> asl_map = new HashMap<>();
 
     final HashMap<Pos, Pos> p2p = new HashMap<>();
-    int sum = 0;
 
     public int cutOffTree(List<List<Integer>> forest) {
         int m = forest.size();
