@@ -1,12 +1,19 @@
 package leetcode.d005.t675;
 
+import leetcode.utils.Utils;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 class Solution {
+
     static class Pos {
-        public final int x;
-        public final int y;
+
+        public final static Pos pos0 = new Pos(0, 0);
+
+        public int x;
+
+        public int y;
 
         public Pos(int x, int y) {
             this.x = x;
@@ -14,9 +21,14 @@ class Solution {
         }
 
         @Override
+        public String toString() {
+            return "(" + x + ", " + y + ')';
+        }
+
+        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {return true;}
+            if (!(o instanceof Pos)) {return false;}
             Pos pos = (Pos) o;
             return x == pos.x && y == pos.y;
         }
@@ -25,9 +37,14 @@ class Solution {
         public int hashCode() {
             return Objects.hash(x, y);
         }
+
     }
 
-    static Map<Pos, Integer> caches = new HashMap<>();
+    final HashMap<Pos, Pos> p2p = new HashMap<>();
+
+    Set<Pos> visited = new HashSet<>();
+
+    int sum = 0;
 
     public int cutOffTree(List<List<Integer>> forest) {
         int m = forest.size();
@@ -42,61 +59,116 @@ class Solution {
                 }
             }
         }
-        final List<Integer> collect = map.keySet().stream().sorted().collect(Collectors.toList());
-        Pos current = new Pos(0, 0);
-        int result = 0;
-        for (int k : collect) {
-            final Pos dst = map.get(k);
-            int cv = forest.get(current.x).get(current.y);
-            int pv = forest.get(dst.x).get(dst.y);
-            Integer cache = caches.get(cv > pv ? new Pos(pv, cv) : new Pos(cv, pv));
-            if (cache != null) {
-                result += cache;
-                current = dst;
-                continue;
-            }
-            int[][] asl = new int[m][n];
-            for (int i = 0; i < m; i++) {
-                Arrays.fill(asl[i], Integer.MAX_VALUE);
-            }
-            Stack<Pos> stack = new Stack<>();
-            f(forest, asl, dst.x, dst.y, 0, stack);
-            if (asl[current.x][current.y] == Integer.MAX_VALUE) {
-                return -1;
-            }
-            result += asl[current.x][current.y];
-            current = dst;
+
+        final List<Pos> c = map.keySet().stream().sorted().map(map::get).collect(Collectors.toList());
+        final Iterator<Pos> iterator = c.iterator();
+        Pos prev = iterator.next();
+
+        while (iterator.hasNext()) {
+            Pos p = iterator.next();
+            p2p.put(prev, p);
+            prev = p;
         }
-        return result;
+
+        int[][] asl0 = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(asl0[i], -1);
+        }
+        f(forest, asl0, 0, 0, 0);
+//        Utils.print_natural(asl0);
+        final Pos pos = c.get(0);
+        sum += asl0[pos.x][pos.y];
+        visited.add(Pos.pos0);
+        if (!add(asl0, Pos.pos0)) {
+            return -1;
+        }
+        f2(asl0, asl0, Pos.pos0, new Pos(0, 1));
+        f2(asl0, asl0, Pos.pos0, new Pos(1, 0));
+        return sum;
     }
 
-    void f(List<List<Integer>> forest, int[][] asl, int x, int y, int value, Stack<Pos> stack) {
+    boolean add(int[][] asl, Pos src) {
+        Pos dst = p2p.remove(src);
+        if (dst != null) {
+            if (asl[dst.x][dst.y] < 0) {
+                p2p.clear();
+                sum = -1;
+                return false;
+            }
+            sum += asl[dst.x][dst.y];
+            return !p2p.isEmpty();
+        }
+        return true;
+    }
+
+    void f2(int[][] asl0, int[][] prev, Pos src, Pos dst) {
+        if (outOfBound(asl0, dst.x, dst.y)) {
+            return;
+        }
+        if (visited.contains(dst)) {
+            return;
+        }
+        if (p2p.isEmpty()) {
+            return;
+        }
+        if (asl0[dst.x][dst.y] <= asl0[src.x][src.y]) {
+            return;
+        }
+        int[][] asl = new int[prev.length][prev[0].length];
+        for (int[] ints : asl) {
+            Arrays.fill(ints, -1);
+        }
+        f3(prev, asl, dst.x, dst.y, prev[src.x][src.y], -1);
+        f3(prev, asl, src.x, src.y, -1, 1);
+//        Utils.print_natural(asl);
+        visited.add(dst);
+        if (!add(asl, dst)) {
+            return;
+        }
+
+        f2(asl0, asl, dst, new Pos(dst.x - 1, dst.y));
+        f2(asl0, asl, dst, new Pos(dst.x + 1, dst.y));
+        f2(asl0, asl, dst, new Pos(dst.x, dst.y - 1));
+        f2(asl0, asl, dst, new Pos(dst.x, dst.y + 1));
+    }
+
+    void f3(int[][] prev, int[][] asl, int x, int y, int v, int dist) {
+        if (outOfBound(prev, x, y)) {
+            return;
+        }
+        if (prev[x][y] <= v) {
+            return;
+        }
+        if (asl[x][y] != -1) {
+            return;
+        }
+        asl[x][y] = prev[x][y] + dist;
+        f3(prev, asl, x - 1, y, prev[x][y], dist);
+        f3(prev, asl, x + 1, y, prev[x][y], dist);
+        f3(prev, asl, x, y - 1, prev[x][y], dist);
+        f3(prev, asl, x, y + 1, prev[x][y], dist);
+    }
+
+    void f(List<List<Integer>> forest, int[][] asl, int x, int y, int value) {
         if (x < 0 || y < 0 || x >= asl.length || y >= asl[0].length) {
             return;
         }
-        final Integer fv = forest.get(x).get(y);
-        if (fv == 0) {
+        if (forest.get(x).get(y) == 0) {
             return;
         }
-        if (value >= asl[x][y]) {
+        if (asl[x][y] >= 0 && value >= asl[x][y]) {
             return;
         }
-        stack.forEach(item -> {
-            final Pos pos;
-            final Integer iv = forest.get(item.x).get(item.y);
-            if (iv > fv) {
-                pos = new Pos(fv, iv);
-            } else {
-                pos = new Pos(iv, fv);
-            }
-            caches.put(pos, value - asl[item.x][item.y]);
-        });
         asl[x][y] = value;
-        stack.push(new Pos(x, y));
-        f(forest, asl, x - 1, y, value + 1, stack);
-        f(forest, asl, x + 1, y, value + 1, stack);
-        f(forest, asl, x, y - 1, value + 1, stack);
-        f(forest, asl, x, y + 1, value + 1, stack);
-        stack.pop();
+
+        f(forest, asl, x - 1, y, value + 1);
+        f(forest, asl, x + 1, y, value + 1);
+        f(forest, asl, x, y - 1, value + 1);
+        f(forest, asl, x, y + 1, value + 1);
     }
+
+    boolean outOfBound(int[][] asl, int x, int y) {
+        return x < 0 || y < 0 || x >= asl.length || y >= asl[0].length || asl[x][y] < 0;
+    }
+
 }
